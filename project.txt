@@ -5,3 +5,9 @@ Password:4F-AjcfSCGYCKK
 
 
 mongodb+srv://marinapanda:4F-AjcfSCGYCKK@cluster0.2zpu0.mongodb.net/suraksha
+
+
+
+
+backend:npm run server
+

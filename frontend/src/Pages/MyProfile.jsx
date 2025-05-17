@@ -5,7 +5,7 @@ const MyProfile = () => {
 
   const [userData,setUserData] = useState({
     name:"Marina Panda",
-    image:assets.profile_pic,
+    image:'https://res.cloudinary.com/drtetll43/image/upload/v1747467381/r6rl5epfucszbtfnmys3.png',
     email:'marinapanda@gmail.com',
     phone:'+91 78546 87549',
     address:{
