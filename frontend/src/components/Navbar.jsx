@@ -1,17 +1,17 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { assets } from '../assets/assets';
-import {AppContext} from '../Context/AppContext';
+import { AppContext } from '../Context/AppContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const {token, setToken} = useContext(AppContext)
+  const { token, setToken, userData } = useContext(AppContext);
   const [showMenu, setShowMenu] = useState(false);
   const logout = () => {
-    setToken(false)
-    localStorage.removeItem('token')
-    navigate('/')
-  }
+    setToken(false);
+    localStorage.removeItem('token');
+    navigate('/');
+  };
   //const [token, setToken] = useState(true); (For temporary use)
 
   return (
@@ -85,10 +85,10 @@ const Navbar = () => {
         </li>
       </ul>
       <div className="flex items-center gap-6">
-        {token ? (
+        {token && userData ? (
           <div className="flex items-center gap-3 cursor-pointer group relative">
             <img
-              src={assets.profile_pic}
+              src={userData.image}
               alt="profile pic"
               className="w-10 h-10 rounded-full border border-gray-300 shadow-sm hover:border-[#5F6FFF] transition-colors duration-300"
             />
