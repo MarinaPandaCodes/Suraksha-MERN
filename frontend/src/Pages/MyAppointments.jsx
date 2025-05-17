@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AppContext } from '../context/AppContext';
 
@@ -8,6 +7,8 @@ const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
 
   const [appointments, setAppointments] = useState([]);
+
+  // Month abbreviations for date formatting
   const months = [
     '',
     'Jan',
@@ -24,6 +25,7 @@ const MyAppointments = () => {
     'Dec',
   ];
 
+  // Formats a date string from "DD_MM_YYYY" to "DD Mon YYYY"
   const slotDateFormat = slotDate => {
     const dateArray = slotDate.split('_');
     return (
@@ -31,19 +33,20 @@ const MyAppointments = () => {
     );
   };
 
-  const navigate = useNavigate();
-
+  // Cancels a specific appointment by ID
   const cancelAppointment = async appointmentId => {
     try {
       const { data } = await axios.post(
         backendUrl + '/api/user/cancel-appointment',
         { appointmentId },
         {
-          headers: { token }, // Pass the auth token in headers
+          headers: { token }, // Include authentication token
         }
       );
+
       if (data.success) {
         toast.success(data.message);
+        // Update the appointment list with cancelled status
         setAppointments(prevAppointments =>
           prevAppointments.map(appointment =>
             appointment._id === appointmentId
@@ -51,8 +54,8 @@ const MyAppointments = () => {
               : appointment
           )
         );
-        getUserAppointments();
-        getDoctorsData();
+        getUserAppointments(); // Refresh appointment list
+        getDoctorsData(); // Update doctor data (possibly availability)
       } else {
         toast.error(data.message);
       }
@@ -62,13 +65,15 @@ const MyAppointments = () => {
     }
   };
 
+  // Fetches all appointments for the logged-in user
   const getUserAppointments = async () => {
     try {
       const { data } = await axios.get(backendUrl + '/api/user/appointments', {
-        headers: { token }, // Pass the auth token in headers
+        headers: { token }, // Include authentication token
       });
 
       if (data.success) {
+        // Reverse to show most recent first
         setAppointments(data.appointments.reverse());
       }
     } catch (error) {
@@ -77,6 +82,7 @@ const MyAppointments = () => {
     }
   };
 
+  // Fetch appointments on component mount or when token changes
   useEffect(() => {
     if (token) {
       getUserAppointments();
@@ -89,11 +95,13 @@ const MyAppointments = () => {
         My Appointments
       </h2>
 
+      {/* Show message if no appointments exist */}
       {appointments.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-8 text-center">
           <p className="text-zinc-600">You don't have any appointments yet.</p>
         </div>
       ) : (
+        // Render list of appointments
         <div className="space-y-5">
           {appointments.map((item, index) => (
             <div
@@ -101,6 +109,7 @@ const MyAppointments = () => {
               key={index}
             >
               <div className="p-6 flex flex-col sm:flex-row gap-6">
+                {/* Doctor Image */}
                 <div className="flex-shrink-0">
                   <img
                     className="w-24 h-24 sm:w-32 sm:h-32 rounded-xl object-cover bg-indigo-50 border border-zinc-200"
@@ -109,6 +118,7 @@ const MyAppointments = () => {
                   />
                 </div>
 
+                {/* Appointment Info */}
                 <div className="flex-grow">
                   <div className="space-y-3">
                     <div>
@@ -120,6 +130,7 @@ const MyAppointments = () => {
                       </p>
                     </div>
 
+                    {/* Doctor Address */}
                     <div className="mt-2 space-y-1">
                       <h4 className="text-sm font-semibold text-zinc-700">
                         Address
@@ -132,6 +143,7 @@ const MyAppointments = () => {
                       </p>
                     </div>
 
+                    {/* Appointment Date & Time */}
                     <div className="mt-2">
                       <p className="text-sm font-semibold text-zinc-700">
                         Date & Time
@@ -143,6 +155,7 @@ const MyAppointments = () => {
                   </div>
                 </div>
 
+                {/* Actions: Pay, Cancel, or Status */}
                 <div className="flex-shrink-0 flex flex-col gap-3 sm:w-48">
                   {!item.cancelled && (
                     <button className="px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-primary border border-primary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 shadow-sm">
