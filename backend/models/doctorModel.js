@@ -1,21 +1,27 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-const doctorSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  image: { type: String, required: true },
-  speciality: { type: String, required: true },
-  degree: { type: String, required: true },
-  experience: { type: String, required: true },
-  about: { type: String, required: true },
-  available: { type: Boolean, default:true },
-  fees: { type: Number, required: true },
-  address: { type: Object, required: true },
-  date: { type: Number, required: true },
-  slots_booked: { type: Object,default:{}}
-},{minimize:false});
+// Define doctor schema
+const doctorSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true }, // Doctor's name
+    email: { type: String, required: true, unique: true }, // Doctor's email (must be unique)
+    password: { type: String, required: true }, // Hashed password
+    image: { type: String, required: true }, // Profile image URL or path
+    speciality: { type: String, required: true }, // Medical speciality
+    degree: { type: String, required: true }, // Qualification
+    experience: { type: String, required: true }, // Years of experience
+    about: { type: String, required: true }, // About the doctor
+    available: { type: Boolean, default: true }, // Availability status
+    fees: { type: Number, required: true }, // Consultation fees
+    address: { type: Object, required: true }, // Address object
+    date: { type: Number, required: true }, // Timestamp or created date
+    slots_booked: { type: Object, default: {} }, // Booked slots by date
+  },
+  { minimize: false }
+); // Keeps empty objects in the document
 
-const doctorModel = mongoose.models.doctor || mongoose.model('doctor',doctorSchema)
+// Use existing model if available, else create new one
+const doctorModel =
+  mongoose.models.doctor || mongoose.model('doctor', doctorSchema);
 
-export default doctorModel
+export default doctorModel;

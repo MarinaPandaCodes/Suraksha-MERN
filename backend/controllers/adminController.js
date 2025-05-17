@@ -88,7 +88,6 @@ const addDoctor = async (req, res) => {
 };
 
 //API for Admin Login
-
 const loginAdmin = async (req, res) => {
   try {
     console.log('Request Body:', req.body);
@@ -110,14 +109,13 @@ const loginAdmin = async (req, res) => {
 };
 
 //API to get all doctors list for admin panel
-
-const allDoctors = async (req,res) => {
+const allDoctors = async (req, res) => {
   try {
-    const doctors = await doctorModel.find({}).select('-password')
-    res.json({success:true,doctors})
+    const doctors = await doctorModel.find({}).select('-password');
+    res.json({ success: true, doctors });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
   }
-}
-export { addDoctor, loginAdmin, allDoctors};
+};
+export { addDoctor, allDoctors, loginAdmin };
