@@ -2,9 +2,9 @@ import bcrypt from 'bcrypt';
 import { v2 as cloudinary } from 'cloudinary';
 import jwt from 'jsonwebtoken';
 import validator from 'validator';
+import appointmentModel from '../models/appointmentModel.js';
 import doctorModel from '../models/doctorModel.js';
 import userModel from '../models/userModel.js';
-import appointmentModel from '../models/appointmentModel.js';
 
 //API to register user
 const registerUser = async (req, res) => {
@@ -194,4 +194,23 @@ const bookAppointment = async (req, res) => {
   }
 };
 
-export { bookAppointment, getProfile, loginUser, registerUser, updateProfile };
+// API to get user appointments for frontend my-appointments page
+const listAppointments = async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const appointments = await appointmentModel.find({ userId });
+    return res.json({ success: true, appointments });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export {
+  bookAppointment,
+  getProfile,
+  loginUser,
+  registerUser,
+  updateProfile,
+  listAppointments,
+};
