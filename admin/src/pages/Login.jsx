@@ -1,8 +1,9 @@
 import axios from 'axios';
 import { useContext, useState } from 'react';
-import {assets} from '../assets/assets'
+import { assets } from '../assets/assets';
 import { AdminContext } from '../context/AdminContext';
 import { toast } from 'react-toastify';
+import { DoctorContext } from '../context/DoctorContext';
 
 const Login = () => {
   const [state, setState] = useState('Admin');
@@ -10,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const { setAToken, backendUrl } = useContext(AdminContext);
+  const { setDToken } = useContext(DoctorContext);
 
   const onSubmitHandler = async event => {
     event.preventDefault();
@@ -21,17 +23,17 @@ const Login = () => {
           password,
         });
         if (data.success) {
-          localStorage.setItem('aToken', data.token)
+          localStorage.setItem('aToken', data.token);
           setAToken(data.token);
-        }else{
-          toast.error(data.message)
+        } else {
+          toast.error(data.message);
         }
       } else {
       }
     } catch (error) {
-      console.log(error.response?.data); 
-  const message = error?.response?.data?.message || "Login failed";
-  toast.error(message);
+      console.log(error.response?.data);
+      const message = error?.response?.data?.message || 'Login failed';
+      toast.error(message);
     }
   };
 
@@ -61,9 +63,7 @@ const Login = () => {
             required
           />
         </div>
-        <button className="bg-primary text-white w-full py-2 rounded-md text-base">
-          Login
-        </button>
+        <button className="bg-primary text-white w-full py-2 rounded-md text-base">Login</button>
         {state === 'Admin' ? (
           <p>
             Doctor Login?{' '}
