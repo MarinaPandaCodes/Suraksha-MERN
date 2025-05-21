@@ -33,10 +33,11 @@ const doctorList = async (req, res) => {
 const loginDoctor = async (req, res) => {
   try {
     const { email, password } = req.body;
+
     const doctor = await doctorModel.findOne({ email });
 
     if (!doctor) {
-      res.json({ success: false, message: 'Invalid Credentials' });
+      return res.json({ success: false, message: 'Invalid Credentials' });
     }
 
     const isMatch = await bcrypt.compare(password, doctor.password);
@@ -52,4 +53,4 @@ const loginDoctor = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
-export { changeAvailability, doctorList };
+export { changeAvailability, doctorList, loginDoctor };
