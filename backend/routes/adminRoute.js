@@ -5,6 +5,7 @@ import {
   loginAdmin,
   appointmentsAdmin,
   appointmentCancel,
+  adminDashboard,
 } from '../controllers/adminController.js';
 import { changeAvailability } from '../controllers/doctorController.js';
 import authAdmin from '../middlewares/authAdmin.js';
@@ -29,5 +30,8 @@ adminRouter.get('/appointments', authAdmin, appointmentsAdmin);
 
 // Cancel an appointment (requires admin auth)
 adminRouter.post('/appointment-cancel', authAdmin, appointmentCancel);
+
+// Get dashboard data (requires admin auth)
+adminRouter.get('/dashboard', authAdmin, adminDashboard);
 
 export default adminRouter;
