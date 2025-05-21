@@ -1,16 +1,45 @@
-import { createContext } from "react";
+import { createContext } from 'react';
 
-export const AppContext = createContext()
+export const AppContext = createContext();
 
-const AppContextProvider = (props) => {
-  const value ={
+const AppContextProvider = props => {
+  const calculateAge = dob => {
+    const today = new Date();
+    const birthDate = new Date(dob);
 
-  }
-  return(
-    <AppContext.Provider value={value}>
-      {props.children}
-    </AppContext.Provider>
-  )
+    let age = today.getFullYear() - birthDate.getFullYear();
+    return age;
+  };
 
-}
-export default AppContextProvider
+  const currency = `₹`;
+  // Month abbreviations for date formatting
+  const months = [
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  // Format date from "DD_MM_YYYY" to "DD Mon YYYY"
+  const slotDateFormat = slotDate => {
+    const dateArray = slotDate.split('_');
+    return `${dateArray[0]} ${months[Number(dateArray[1])]} ${dateArray[2]}`;
+  };
+
+  const value = {
+    calculateAge,
+    slotDateFormat,
+    currency
+  };
+  return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
+};
+export default AppContextProvider;

@@ -5,7 +5,6 @@ import { AppContext } from '../context/AppContext';
 
 const MyAppointments = () => {
   const { backendUrl, token, getDoctorsData } = useContext(AppContext);
-
   const [appointments, setAppointments] = useState([]);
 
   // Month abbreviations for date formatting
@@ -25,68 +24,84 @@ const MyAppointments = () => {
     'Dec',
   ];
 
-  // Formats a date string from "DD_MM_YYYY" to "DD Mon YYYY"
+  // Format date from "DD_MM_YYYY" to "DD Mon YYYY"
   const slotDateFormat = slotDate => {
     const dateArray = slotDate.split('_');
-    return (
-      dateArray[0] + ' ' + months[Number(dateArray[1])] + ' ' + dateArray[2]
-    );
+    return `${dateArray[0]} ${months[Number(dateArray[1])]} ${dateArray[2]}`;
   };
 
-  // Cancels a specific appointment by ID
+  // Load payment status from localStorage when appointments are fetched
+  useEffect(() => {
+    if (appointments.length > 0) {
+      const storedPayments = localStorage.getItem('appointmentPayments');
+      if (storedPayments) {
+        const paymentStatus = JSON.parse(storedPayments);
+        setAppointments(prev =>
+          prev.map(app => ({
+            ...app,
+            paymentDone: paymentStatus[app._id] || false,
+          }))
+        );
+      }
+    }
+  }, [appointments.length]);
+
+  // Cancel appointment
   const cancelAppointment = async appointmentId => {
     try {
       const { data } = await axios.post(
-        backendUrl + '/api/user/cancel-appointment',
+        `${backendUrl}/api/user/cancel-appointment`,
         { appointmentId },
-        {
-          headers: { token }, // Include authentication token
-        }
+        { headers: { token } }
       );
 
       if (data.success) {
         toast.success(data.message);
-        // Update the appointment list with cancelled status
-        setAppointments(prevAppointments =>
-          prevAppointments.map(appointment =>
-            appointment._id === appointmentId
-              ? { ...appointment, cancelled: true }
-              : appointment
-          )
+        setAppointments(prev =>
+          prev.map(app => (app._id === appointmentId ? { ...app, cancelled: true } : app))
         );
-        getUserAppointments(); // Refresh appointment list
-        getDoctorsData(); // Update doctor data (possibly availability)
+        getUserAppointments();
+        getDoctorsData();
       } else {
         toast.error(data.message);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
 
-  // Fetches all appointments for the logged-in user
+  // Handle pay online - stores in localStorage
+  const handlePayOnline = appointmentId => {
+    // Update localStorage
+    const storedPayments = localStorage.getItem('appointmentPayments');
+    const paymentStatus = storedPayments ? JSON.parse(storedPayments) : {};
+    paymentStatus[appointmentId] = true;
+    localStorage.setItem('appointmentPayments', JSON.stringify(paymentStatus));
+
+    // Update state
+    setAppointments(prev =>
+      prev.map(app => (app._id === appointmentId ? { ...app, paymentDone: true } : app))
+    );
+    toast.success('Payment status updated');
+  };
+
+  // Fetch appointments
   const getUserAppointments = async () => {
     try {
-      const { data } = await axios.get(backendUrl + '/api/user/appointments', {
-        headers: { token }, // Include authentication token
+      const { data } = await axios.get(`${backendUrl}/api/user/appointments`, {
+        headers: { token },
       });
 
       if (data.success) {
-        // Reverse to show most recent first
         setAppointments(data.appointments.reverse());
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   };
 
-  // Fetch appointments on component mount or when token changes
   useEffect(() => {
-    if (token) {
-      getUserAppointments();
-    }
+    if (token) getUserAppointments();
   }, [token]);
 
   return (
@@ -95,13 +110,11 @@ const MyAppointments = () => {
         My Appointments
       </h2>
 
-      {/* Show message if no appointments exist */}
       {appointments.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm p-8 text-center">
           <p className="text-zinc-600">You don't have any appointments yet.</p>
         </div>
       ) : (
-        // Render list of appointments
         <div className="space-y-5">
           {appointments.map((item, index) => (
             <div
@@ -122,32 +135,18 @@ const MyAppointments = () => {
                 <div className="flex-grow">
                   <div className="space-y-3">
                     <div>
-                      <h3 className="text-xl font-bold text-zinc-800">
-                        {item.docData.name}
-                      </h3>
-                      <p className="text-sm text-zinc-500 font-medium">
-                        {item.docData.speciality}
-                      </p>
+                      <h3 className="text-xl font-bold text-zinc-800">{item.docData.name}</h3>
+                      <p className="text-sm text-zinc-500 font-medium">{item.docData.speciality}</p>
                     </div>
 
-                    {/* Doctor Address */}
                     <div className="mt-2 space-y-1">
-                      <h4 className="text-sm font-semibold text-zinc-700">
-                        Address
-                      </h4>
-                      <p className="text-sm text-zinc-600">
-                        {item.docData.address.line1}
-                      </p>
-                      <p className="text-sm text-zinc-600">
-                        {item.docData.address.line2}
-                      </p>
+                      <h4 className="text-sm font-semibold text-zinc-700">Address</h4>
+                      <p className="text-sm text-zinc-600">{item.docData.address.line1}</p>
+                      <p className="text-sm text-zinc-600">{item.docData.address.line2}</p>
                     </div>
 
-                    {/* Appointment Date & Time */}
                     <div className="mt-2">
-                      <p className="text-sm font-semibold text-zinc-700">
-                        Date & Time
-                      </p>
+                      <p className="text-sm font-semibold text-zinc-700">Date & Time</p>
                       <p className="text-sm text-zinc-600">
                         {slotDateFormat(item.slotDate)} | {item.slotTime}
                       </p>
@@ -155,25 +154,31 @@ const MyAppointments = () => {
                   </div>
                 </div>
 
-                {/* Actions: Pay, Cancel, or Status */}
+                {/* Action Buttons */}
                 <div className="flex-shrink-0 flex flex-col gap-3 sm:w-48">
-                  {!item.cancelled && (
-                    <button className="px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-primary border border-primary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 shadow-sm">
-                      Pay Online
-                    </button>
-                  )}
-                  {!item.cancelled && (
-                    <button
-                      className="px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-opacity-50 shadow-sm"
-                      onClick={() => cancelAppointment(item._id)}
-                    >
-                      Cancel Appointment
-                    </button>
-                  )}
-                  {item.cancelled && (
+                  {item.paymentDone ? (
+                    <span className="px-4 py-2.5 text-sm font-medium rounded-lg bg-green-100 text-green-700 text-center">
+                      Payment Done
+                    </span>
+                  ) : item.cancelled ? (
                     <span className="px-4 py-2.5 text-sm font-medium rounded-lg bg-zinc-100 text-zinc-500 text-center">
                       Appointment Cancelled
                     </span>
+                  ) : (
+                    <>
+                      <button
+                        className="px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-primary border border-primary hover:bg-primary hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-opacity-50 shadow-sm"
+                        onClick={() => handlePayOnline(item._id)}
+                      >
+                        Pay Online
+                      </button>
+                      <button
+                        className="px-4 py-2.5 text-sm font-medium rounded-lg bg-white text-red-600 border border-red-600 hover:bg-red-600 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-opacity-50 shadow-sm"
+                        onClick={() => cancelAppointment(item._id)}
+                      >
+                        Cancel Appointment
+                      </button>
+                    </>
                   )}
                 </div>
               </div>

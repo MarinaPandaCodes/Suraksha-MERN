@@ -3,6 +3,8 @@ import {
   addDoctor,
   allDoctors,
   loginAdmin,
+  appointmentsAdmin,
+  appointmentCancel,
 } from '../controllers/adminController.js';
 import { changeAvailability } from '../controllers/doctorController.js';
 import authAdmin from '../middlewares/authAdmin.js';
@@ -21,5 +23,11 @@ adminRouter.post('/all-doctors', authAdmin, allDoctors);
 
 // Change doctor availability (requires admin auth)
 adminRouter.post('/change-availability', authAdmin, changeAvailability);
+
+// Get all appointments (requires admin auth)
+adminRouter.get('/appointments', authAdmin, appointmentsAdmin);
+
+// Cancel an appointment (requires admin auth)
+adminRouter.post('/appointment-cancel', authAdmin, appointmentCancel);
 
 export default adminRouter;
