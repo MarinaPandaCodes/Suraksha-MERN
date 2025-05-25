@@ -29,6 +29,17 @@ const Login = () => {
           toast.error(data.message);
         }
       } else {
+        const { data } = await axios.post(backendUrl + '/api/doctor/login', {
+          email,
+          password,
+        });
+        if (data.success) {
+          localStorage.setItem('dToken', data.token);
+          setDToken(data.token);
+          console.log(data.token);
+        } else {
+          toast.error(data.message);
+        }
       }
     } catch (error) {
       console.log(error.response?.data);

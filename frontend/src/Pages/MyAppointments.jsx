@@ -156,8 +156,12 @@ const MyAppointments = () => {
 
                 {/* Action Buttons */}
                 <div className="flex-shrink-0 flex flex-col gap-3 sm:w-48">
-                  {item.paymentDone ? (
+                  {item.isCompleted ? (
                     <span className="px-4 py-2.5 text-sm font-medium rounded-lg bg-green-100 text-green-700 text-center">
+                      Appointment Completed
+                    </span>
+                  ) : item.paymentDone ? (
+                    <span className="px-4 py-2.5 text-sm font-medium rounded-lg bg-blue-100 text-blue-700 text-center">
                       Payment Done
                     </span>
                   ) : item.cancelled ? (
